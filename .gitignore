@@ -1,0 +1,10 @@
+*
+!*.*
+!*/
+
+.*.swp
+__pycache__/
+
+DATA
+my_models
+
