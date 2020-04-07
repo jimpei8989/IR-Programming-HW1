@@ -5,7 +5,7 @@ from Modules.TFIDF import OkapiBM25
 
 def main():
     args = helper.getArguments()
-    TFIDF_name = args.name[0]
+    name = args.name[0]
 
     try:
         os.mkdir(args.c[0])
@@ -62,7 +62,7 @@ def main():
     # Handle Normalized TF
     if args.tfidf:
         with EventTimer('Calculating OkapiBM25 - ' + name):
-            vsm = OkapiBM25(name, numOfBigrams, numOfDocuments, rawTF, rawIDF, calculate = True)
+            vsm = OkapiBM25(name, numOfBigrams, numOfDocuments, rawTF, rawIDF, calculate = True, k1 = 2)
             vsm.Save(args.c[0])
     else:
         with EventTimer('Loading OkapiBM25 - ' + name):

@@ -44,7 +44,7 @@ def getArguments():
                         help = 'Perform preprocessing')
     parser.add_argument('--tfidf', action = 'store_true',
                         help = 'Calculate TFIDF')
-    parser.add_argument('--model-name', type = str, nargs = 1, metavar = 'MODEL-NAME', dst = 'name',
+    parser.add_argument('--model-name', type = str, nargs = 1, metavar = 'MODEL-NAME', dest = 'name',
                         help = 'The name used in TF IDF models')
     return parser.parse_args()
 

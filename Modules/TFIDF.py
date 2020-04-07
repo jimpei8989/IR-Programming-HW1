@@ -15,6 +15,7 @@ class VSM():
 
     def Save(self, modelDir):
         directory = os.path.join(modelDir, self.name)
+
         try:
             os.mkdir(directory)
         except FileExistsError:
@@ -44,8 +45,8 @@ class VSM():
         raise NotImplementedError
 
 class OkapiBM25(VSM):
-    def __init__(self, name, N = None, M = None, TF = None, IDF = None, calculate = False):
-        def CalculateTF(k1 = 1.5, b = 0.75):
+    def __init__(self, name, N = None, M = None, TF = None, IDF = None, calculate = False, k1 = 1.5, b = 0.75):
+        def CalculateTF():
             data, rows, cols = TF
             documentLength = np.zeros(M)
 
