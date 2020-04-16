@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 import xml.etree.ElementTree as ET
 import numpy as np
 import scipy
+from sklearn.preprocessing import normalize
 
 _LightGray = '\x1b[38;5;251m'
 _Bold = '\x1b[1m'
@@ -139,5 +140,5 @@ def translateQuery(queryList, terms, Voc2ID, features = [], weights = None):
         queryIDs.append(query['number'][-3:])
         queryVectors.append(vec)
 
-    return queryIDs, np.stack(queryVectors)
+    return queryIDs, normalize(np.stack(queryVectors), axis = 1, copy = False)
 

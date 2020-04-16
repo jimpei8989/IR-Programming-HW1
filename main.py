@@ -1,7 +1,11 @@
 import os, sys, time
+
+from sklearn.preprocessing import normalize
+
 from Modules import helper, preprocessing
 from Modules.helper import *
 from Modules.TFIDF import OkapiBM25
+
 
 def main():
     args = helper.getArguments()
@@ -24,7 +28,7 @@ def main():
         numOfDocuments = len(documentList)
 
         print(f'#Vocabularies:\t{numOfVocabularies}')
-        print(f'#Files:\t\t{numOfDocuments}')
+        print(f'#Documents:\t{numOfDocuments}')
 
     # Handle Query File
     with EventTimer(name = 'Get query list'):
@@ -62,7 +66,7 @@ def main():
     # Handle Normalized TF
     if args.tfidf:
         with EventTimer('Calculating OkapiBM25 - ' + name):
-            vsm = OkapiBM25(name, numOfBigrams, numOfDocuments, rawTF, rawIDF, calculate = True, k1 = 2)
+            vsm = OkapiBM25(name, numOfBigrams, numOfDocuments, rawTF, rawIDF, calculate = True, k1 = 2.0)
             vsm.Save(args.c[0])
     else:
         with EventTimer('Loading OkapiBM25 - ' + name):
@@ -71,10 +75,17 @@ def main():
 
     with EventTimer('Transform query to vectors'):
         # Keys are: 'number', 'title', 'question', 'narrative', 'concepts'
-        queryIDs, queryVectors = translateQuery(queryList, terms, Voc2ID,
+        queryIDs, queryVectors = helper.translateQuery(queryList, terms, Voc2ID,
                 features = ['concepts'])
 
     with EventTimer('Finding relevance documents'):
+        if args.r:
+            alpha, beta = 0.90, 0.10
+            for _ in range(1):
+                retrievedDocs = vsm.Rank(queryVectors, top = 10)
+                centroids = vsm.CalculateCentroid(retrievedDocs)
+                queryVectors = normalize(alpha * queryVectors + beta * centroids, axis = 1)
+
         retrievedDocs = [[idx2DocID[i] for i in ans] for ans in vsm.Rank(queryVectors)]
 
         with open(args.o[0], 'w') as f:

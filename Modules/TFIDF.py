@@ -9,6 +9,7 @@ class VSM():
     def __init__(self, name, TF = None, IDF = None):
         self.name = name
         self.TF = None
+        self.TF_CSC = None
         self.IDF = None
         self.score = None
         pass
@@ -31,18 +32,23 @@ class VSM():
         self.IDF = LoadNPY(os.path.join(directory, 'idf.npy'))
         self.score = LoadSPM(os.path.join(directory, 'score.npz'))
 
-    def Query(self, queryVectors):
-        ret = []
-        for qvec in queryVectors:
-            qvec = normalize(qvec.reshape((-1, 1)), axis = 0)
-            scores = np.array(self.score.multiply(qvec).sum(axis = 0)).reshape(-1)
-            docs = np.argsort(scores)[-100:][::-1]
-            pairs = list(zip(docs, scores[docs]))
-            ret.append(pairs)
-        return ret
+    def Query(self, queryVectors, k3 = 0):
+        #  scoreMatrix = ((k3 + 1) * queryVectors / (k3 + queryVectors)) @ self.score
+        scoreMatrix = queryVectors @ self.score
+        rankedDocuments = np.argsort(-scoreMatrix, axis = 1)[:, :100]
+        return rankedDocuments, np.stack([s[i] for s, i in zip(scoreMatrix, rankedDocuments)])
 
-    def Normalize(self):
-        raise NotImplementedError
+    def Rank(self, queryVectors, k3 = 0, top = 100, threshold = 0):
+        #  return [list(filter(lambda k : k[1] > threshold, zip(*pair)))[:top] for pair in zip(self.Query(queryVectors))]
+        rankedDocuments, rankedScores = self.Query(queryVectors, k3 = k3)
+        return rankedDocuments
+
+    def CalculateCentroid(self, relevanceDocuments):
+        if self.TF_CSC is None:
+            self.TF_CSC = self.TF.tocsc()
+        ret = [np.mean(np.stack(list(map(lambda k : self.TF_CSC.getcol(k).toarray().reshape(-1), rel))), axis = 0) for rel in relevanceDocuments]
+        return normalize(np.stack(ret), axis = 1)
+
 
 class OkapiBM25(VSM):
     def __init__(self, name, N = None, M = None, TF = None, IDF = None, calculate = False, k1 = 1.5, b = 0.75):
@@ -71,8 +77,4 @@ class OkapiBM25(VSM):
             self.IDF = CalculateIDF()
             self.score = self.TF.multiply(self.IDF)
             self.score = normalize(self.score, axis = 0, copy = False)
-
-    def Rank(self, queryVectors):
-        answers = self.Query(queryVectors)
-        return [[d for d, s in ans[:25]] for ans in answers]
 
