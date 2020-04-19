@@ -4,12 +4,13 @@ from scipy.sparse import csr_matrix, lil_matrix
 from Modules.helper import EventTimer
 
 def handleInvertedFile(invertedFilePath, numOfDocuments):
-    unigrams, bigrams = list(), list()
-    unigramIdx, bigramIdx = 0, 0
+    #  unigrams, unigramIdx = list(), 0
+    #  uniData, uniRows, uniCols = list(), list(), list()
+    #  unigramIDF = list()
 
-    uniData, uniRows, uniCols = list(), list(), list()
+    bigrams, bigramIdx = list(), 0
     biData, biRows, biCols = list(), list(), list()
-    unigramIDF, bigramIDF = list(), list()
+    bigramIDF = list()
 
     with open(invertedFilePath, 'r') as f:
         while True:
@@ -20,14 +21,15 @@ def handleInvertedFile(invertedFilePath, numOfDocuments):
                 break
 
             if y == -1: # is unigram
-                unigrams.append((x,))
-
-                uniData += [c for d, c in occurences]
-                uniRows += [unigramIdx] * M
-                uniCols += [d for d, c in occurences]
-
-                unigramIDF.append(M)
-                unigramIdx += 1
+                pass
+                #  unigrams.append((x,))
+                #
+                #  uniData += [c for d, c in occurences]
+                #  uniRows += [unigramIdx] * M
+                #  uniCols += [d for d, c in occurences]
+                #
+                #  unigramIDF.append(M)
+                #  unigramIdx += 1
             else:       # is bigram
                 bigrams.append((x, y))
 
@@ -38,13 +40,13 @@ def handleInvertedFile(invertedFilePath, numOfDocuments):
                 bigramIDF.append(M)
                 bigramIdx += 1
 
-    numOfUnigrams = len(unigrams)
+    # numOfUnigrams = len(unigrams)
     numOfBigrams = len(bigrams)
 
-    print(numOfUnigrams)
-    print(numOfBigrams)
+    # print(numOfUnigrams)
+    print('# Bigrams:\t', numOfBigrams)
 
-    unigramTF = (uniData, uniRows, uniCols)
+    # unigramTF = (uniData, uniRows, uniCols)
     #  unigramTF = csr_matrix((uniData, (uniRows, uniCols)), shape = (numOfUnigrams, numOfDocuments))
     #  unigramDocLength = np.asarray(unigramTF.sum(axis = 0)).reshape(-1)
 
@@ -52,5 +54,6 @@ def handleInvertedFile(invertedFilePath, numOfDocuments):
     #  bigramTF = csr_matrix((biData, (biRows, biCols)), shape = (numOfBigrams, numOfDocuments))
     #  bigramDocLength = np.asarray(bigramTF.sum(axis = 0)).reshape(-1)
     
-    return unigrams, bigrams, unigramTF, bigramTF, np.array(unigramIDF), np.array(bigramIDF)
+    # return unigrams, bigrams, unigramTF, bigramTF, np.array(unigramIDF), np.array(bigramIDF)
+    return bigrams, bigramTF, np.array(bigramIDF)
 

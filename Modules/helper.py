@@ -1,4 +1,4 @@
-import os, time
+import os, sys, time
 import pickle
 from argparse import ArgumentParser
 import xml.etree.ElementTree as ET
@@ -19,13 +19,14 @@ class EventTimer():
         self.description = description
 
     def __enter__(self):
-        print(_LightGray + '------------------ Begin "' + _SkyBlue + _Bold + _Underline + self.name + _Reset + _LightGray + '" ------------------' + _Reset)
+        print(_LightGray + '------------------ Begin "' + _SkyBlue + _Bold + _Underline + self.name + _Reset + _LightGray +
+                '" ------------------' + _Reset, file = sys.stderr)
         self.beginTimestamp = time.time()
 
     def __exit__(self, type, value, traceback):
         elapsedTime = time.time() - self.beginTimestamp
         print(_LightGray + '------------------ End   "' + _SkyBlue + _Bold + _Underline + self.name + _Reset + _LightGray +
-                ' (Elapsed ' + _Orange + f'{elapsedTime:.4f}' + _Reset + 's)" ------------------' + _Reset + '\n')
+                ' (Elapsed ' + _Orange + f'{elapsedTime:.4f}' + _Reset + 's)" ------------------' + _Reset + '\n', file = sys.stderr)
 
 def getArguments():
     parser = ArgumentParser()
@@ -82,7 +83,6 @@ def getDocumentIDs(docList):
     def getID(doc):
         root = ET.parse(doc).getroot().find('doc')
         return root.find('id').text
-
     return list(map(getID, docList))
 
 def getQueryList(queryFilePath):

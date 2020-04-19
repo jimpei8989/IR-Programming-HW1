@@ -7,7 +7,7 @@ def MAP(T, R):
         precisions = []
         cnt = 0
         for i, d in enumerate(R):
-            if d in T[:i+1]:
+            if d in T:
                 cnt += 1
                 precisions.append(cnt / (i + 1))
         return sum(precisions) / len(T)

@@ -51,16 +51,23 @@ class VSM():
 
 
 class OkapiBM25(VSM):
-    def __init__(self, name, N = None, M = None, TF = None, IDF = None, calculate = False, k1 = 1.5, b = 0.75):
+    def __init__(self, name, N = None, M = None, TF = None, IDF = None, calculate = False, k1 = 1.5, b = 0.75, calDocLen = True):
         def CalculateTF():
             data, rows, cols = TF
-            documentLength = np.zeros(M)
 
-            docUsed = set()
+            if calDocLen:
+                documentLength = np.zeros(M)
+                docUsed = set()
 
-            for d, c in zip(data, cols):
-                documentLength[c] += d
-                docUsed.add(c)
+                for d, c in zip(data, cols):
+                    documentLength[c] += d
+                    docUsed.add(c)
+
+                with open('doc-len.npy', 'wb') as f:
+                    np.save(f, documentLength)
+            else:
+                with open('doc-len.npy', 'rb') as f:
+                    documentLength = np.load(f)
 
             avgDocLength = np.mean(documentLength)
 

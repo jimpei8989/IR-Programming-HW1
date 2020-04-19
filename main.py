@@ -27,8 +27,8 @@ def main():
         idx2DocID = helper.getDocumentIDs(documentList)
         numOfDocuments = len(documentList)
 
-        print(f'#Vocabularies:\t{numOfVocabularies}')
-        print(f'#Documents:\t{numOfDocuments}')
+        print(f'# Vocabularies:\t{numOfVocabularies}')
+        print(f'# Documents:\t{numOfDocuments}')
 
     # Handle Query File
     with EventTimer(name = 'Get query list'):
@@ -40,24 +40,28 @@ def main():
     ### RawIDFs: np-arrays n(t)
     if args.preprocessing:  # Perform Preprocessing
         with EventTimer(name = 'Get Raw TF & IDF'):
-            unigrams, bigrams, unigramRawTF, bigramRawTF, unigramRawIDF, bigramRawIDF = preprocessing.handleInvertedFile(
+            bigrams, bigramRawTF, bigramRawIDF = preprocessing.handleInvertedFile(
                     os.path.join(args.m[0], 'inverted-file'), numOfDocuments)
-            SavePkl(unigrams, os.path.join(args.c[0], 'unigram.pkl'))
+            #  unigrams, bigrams, unigramRawTF, bigramRawTF, unigramRawIDF, bigramRawIDF = preprocessing.handleInvertedFile(
+            #          os.path.join(args.m[0], 'inverted-file'), numOfDocuments)
+
+            #  SavePkl(unigrams, os.path.join(args.c[0], 'unigram.pkl'))
+            #  SavePkl(unigramRawTF, os.path.join(args.c[0], 'unigram-raw-tf.pkl'))
+            #  SaveNPY(unigramRawIDF, os.path.join(args.c[0], 'unigram-raw-idf.npy'))
             SavePkl(bigrams, os.path.join(args.c[0], 'bigram.pkl'))
-            SavePkl(unigramRawTF, os.path.join(args.c[0], 'unigram-raw-tf.pkl'))
             SavePkl(bigramRawTF, os.path.join(args.c[0], 'bigram-raw-tf.pkl'))
-            SaveNPY(unigramRawIDF, os.path.join(args.c[0], 'unigram-raw-idf.npy'))
             SaveNPY(bigramRawIDF, os.path.join(args.c[0], 'bigram-raw-idf.npy'))
+
     else:   # Loading
         with EventTimer(name = 'Load Raw TF & IDF'):
-            unigrams = LoadPkl(os.path.join(args.c[0], 'unigram.pkl'))
+            #  unigrams = LoadPkl(os.path.join(args.c[0], 'unigram.pkl'))
+            #  unigramRawTF = LoadPkl(os.path.join(args.c[0], 'unigram-raw-tf.pkl'))
+            #  unigramRawIDF = LoadNPY(os.path.join(args.c[0], 'unigram-raw-idf.npy'))
             bigrams = LoadPkl(os.path.join(args.c[0], 'bigram.pkl'))
-            unigramRawTF = LoadPkl(os.path.join(args.c[0], 'unigram-raw-tf.pkl'))
             bigramRawTF = LoadPkl(os.path.join(args.c[0], 'bigram-raw-tf.pkl'))
-            unigramRawIDF = LoadNPY(os.path.join(args.c[0], 'unigram-raw-idf.npy'))
             bigramRawIDF = LoadNPY(os.path.join(args.c[0], 'bigram-raw-idf.npy'))
 
-    numOfUnigrams, numOfBigrams = len(unigrams), len(bigrams)
+    numOfBigrams = len(bigrams)
 
     terms = bigrams
     rawTF = bigramRawTF
@@ -66,7 +70,7 @@ def main():
     # Handle Normalized TF
     if args.tfidf:
         with EventTimer('Calculating OkapiBM25 - ' + name):
-            vsm = OkapiBM25(name, numOfBigrams, numOfDocuments, rawTF, rawIDF, calculate = True, k1 = 2.0)
+            vsm = OkapiBM25(name, numOfBigrams, numOfDocuments, rawTF, rawIDF, calculate = True, k1 = 2.4, calDocLen = False)
             vsm.Save(args.c[0])
     else:
         with EventTimer('Loading OkapiBM25 - ' + name):
@@ -80,8 +84,9 @@ def main():
 
     with EventTimer('Finding relevance documents'):
         if args.r:
-            alpha, beta = 0.90, 0.10
-            for _ in range(1):
+            alpha, beta = 0.95, 0.05
+            iterations = 5
+            for _ in range(iterations):
                 retrievedDocs = vsm.Rank(queryVectors, top = 10)
                 centroids = vsm.CalculateCentroid(retrievedDocs)
                 queryVectors = normalize(alpha * queryVectors + beta * centroids, axis = 1)
