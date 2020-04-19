@@ -84,8 +84,8 @@ def main():
 
     with EventTimer('Finding relevance documents'):
         if args.r:
-            alpha, beta = 0.95, 0.05
-            iterations = 5
+            alpha, beta = 0.80, 0.20
+            iterations = 1
             for _ in range(iterations):
                 retrievedDocs = vsm.Rank(queryVectors, top = 10)
                 centroids = vsm.CalculateCentroid(retrievedDocs)
