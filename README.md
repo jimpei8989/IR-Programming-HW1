@@ -12,7 +12,7 @@ Check -> [report](./report.md)
 
 ### Execute
 - Compile
-    ```bash
+```bash
 ./compile.sh
 ```
 - Execute
